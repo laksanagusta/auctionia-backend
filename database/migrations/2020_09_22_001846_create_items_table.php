@@ -18,8 +18,10 @@ class CreateItemsTable extends Migration
             $table->string('name');
             $table->string('price');
             $table->string('picture');
-            $table->integer('category_id');
-            $table->foreign('category_id')->references('id')->on('categories');
+            $table->integer('users_id')->nullable();
+            $table->foreign('users_id')->references('id')->on('users');
+            $table->integer('categories_id');
+            $table->foreign('categories_id')->references('id')->on('categories');
             $table->timestamps();
         });
     }

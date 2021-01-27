@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\itemsController;
 use App\Http\Controllers\userController;
+use App\Http\Controllers\categoriesController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -27,10 +28,10 @@ Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
 Route::prefix('dashboard')
     ->middleware(['auth:sanctum'])
     ->group(function() {
-        // Route::get('/', [DashboardController::class, 'index'])->name('admin-dashboard');
-        // Route::resource('food', FoodController::class);
         Route::resource('users', UserController::class);
-
-        // Route::get('transactions/{id}/status/{status}', [TransactionController::class, 'changeStatus'])->name('transactions.changeStatus');
-        // Route::resource('transactions', TransactionController::class);
+        Route::resource('categories', CategoriesController::class);
     });
+
+Route::get('/sentry', function() {
+    throw new Exception("Error Processing Request", 1);
+});

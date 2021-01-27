@@ -14,7 +14,8 @@ class Item extends Model
         'id',
         'name',
         'price',
-        'category_id',
+        'picture',
+        'categories_id',
         'users_id',
         'desc'
     ];
@@ -36,6 +37,6 @@ class Item extends Model
 
     public function category()
     {
-        return $this->hasOne(Category::class, 'id', 'category_id');
+        return $this->hasOne(Category::class, 'id', 'categories_id');
     }
 }

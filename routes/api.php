@@ -2,13 +2,13 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\itemsController;
-use App\Http\Controllers\categoryController;
-use App\Http\Controllers\userController;
-use App\Http\Controllers\favouritesController;
-use App\Http\Controllers\bidController;
-use App\Http\Controllers\transactionController;
-use App\Http\Controllers\commentController;
+use App\Http\Controllers\API\itemsController;
+use App\Http\Controllers\API\categoryController;
+use App\Http\Controllers\API\userController;
+use App\Http\Controllers\API\favouritesController;
+use App\Http\Controllers\API\bidController;
+use App\Http\Controllers\API\transactionController;
+use App\Http\Controllers\API\commentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,26 +21,28 @@ use App\Http\Controllers\commentController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/addBarang', [itemsController::class, 'addBarang']);
+    Route::post('/favourites/store', [favouritesController::class, 'store']);
+    Route::post('/comments/store', [commentController::class, 'store']);
+    Route::post('/bid/store', [bidController::class, 'store']);
 });
 
 Route::get('/items', [itemsController::class, 'index']);
 Route::put('/items/{id}', [itemsController::class, 'updateItem']);
 Route::get('/getItems/{categoryId}/{userId}', [itemsController::class, 'getItems']);
 Route::get('/getItemsEtalase/{users_id}', [itemsController::class, 'getItemsEtalase']);
-Route::post('/addBarang', [itemsController::class, 'addBarang']);
 
-Route::post('/favourites/store', [favouritesController::class, 'store']);
-
-Route::post('/bid/store', [bidController::class, 'store']);
 Route::post('/bid/index', [bidController::class, 'index']);
 Route::post('/bid-in/index', [bidController::class, 'indexIn']);
 Route::post('/bid-out/index', [bidController::class, 'indexOut']);
 Route::get('/bid/indexBidPerItem/{itemId}', [bidController::class, 'indexBidPerItem']);
 
-Route::post('/comments/indexCommentPerItem', [commentController::class, 'indexCommentPerItem']);
-Route::post('/comments/store', [commentController::class, 'store']);
+Route::get('/comments/indexCommentPerItem/{itemId}', [commentController::class, 'indexCommentPerItem']);
 
 Route::post('/transaction/index', [bidController::class, 'transaction']);
 

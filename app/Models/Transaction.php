@@ -9,10 +9,7 @@ use DB;
 class Transaction extends Model
 {
     use HasFactory;
-    public function indexTransaction($users_id)
-    {
-        
-    }
+    protected $fillable = ['desc', 'debit', 'credit'];
     
     public function item()
     {

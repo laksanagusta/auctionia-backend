@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
 use App\Actions\Fortify\PasswordValidationRules;
 use App\Helpers\ResponseFormatter;
@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
+use Webpatser\Uuid\Uuid;
 use DB;
 
 
@@ -33,7 +36,9 @@ class userController extends Controller
      */
 
     public function index(){
-        $user = User::paginate(10);
+        $user = Cache::remember('user', 86400, function () {
+            return User::paginate(10);
+        }); 
 
         return view('user.index', [
             'user' => $user
@@ -57,6 +62,8 @@ class userController extends Controller
             $user = User::where('email', $request->email)->first();
 
             $tokenResult = $user->createToken('authToken')->plainTextToken;
+
+            Cache::forget('user');
 
             return ResponseFormatter::success([
                 'access_token' => $tokenResult,
@@ -118,8 +125,22 @@ class userController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $data = $request->all();
-        $user->update($data);
+
+        $user = User::find($request->users_id);
+        $user->name = $request->name;
+
+        if($request->picture !== ""){
+            Storage::disk('s3')->delete($user->profile_photo_path);
+            $data = $request->picture;
+            $dataconfirm = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data));
+            $uuidGenerated = Uuid::generate();
+            Storage::disk('s3')->put('auctionia-images/'.$uuidGenerated, $dataconfirm);
+            $user->profile_photo_path = 'auctionia-images/'.$uuidGenerated;
+        }
+
+        $user->save();
+
+        $user = User::find($request->users_id);
 
         return ResponseFormatter::success([
             'user' => $user
@@ -128,8 +149,19 @@ class userController extends Controller
 
     public function editPicture(Request $request)
     {
-        $users = new User;
-        $users->updatePicture($request->email, $request->picture);
-        return $users;
+        $data = $request->picture;
+        $dataconfirm = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $data));
+        $uuidGenerated = Uuid::generate();
+        $image_s3_path = Storage::disk('s3')->put('auctionia-images/'.$uuidGenerated, $dataconfirm);
+        $affected = DB::table('users')
+              ->where('email', $request->email)
+              ->update(['profile_photo_path' => 'auctionia-images/'.$uuidGenerated]);
+        return ResponseFormatter::success([
+            'image_path' => 'auctionia-images/'.$uuidGenerated,
+
+        ],'User Updated');
     }
 }
+
+//lumen
+//redis

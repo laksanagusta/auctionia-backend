@@ -9,6 +9,7 @@ use DB;
 class Bid extends Model
 {
     use HasFactory;
+    protected $fillable = ['users_id', 'items_id', 'bid_amount', 'desc'];
     public function storeBid($users_id, $items_id, $bid_amount)
     {
         $bid = new Bid;
@@ -31,7 +32,7 @@ class Bid extends Model
 
     public function bidPerItem($items_id)
     {
-        $bid = DB::SELECT("SELECT b.id, u.name as username, i.name, b.bid_amount, b.desc
+        $bid = DB::SELECT("SELECT b.id, u.name as username, u.profile_photo_path, i.name, b.bid_amount, b.desc
                     FROM users u 
                     RIGHT JOIN bids b ON b.users_id = u.id
                     LEFT JOIN items i ON i.id = b.items_id 
